@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI指数自测工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        body {
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-size: 16px;
+        }
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4285f4;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #3367d6;
+        }
+        .standards {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        .standards h3 {
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .standards ul {
+            padding-left: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        .standards li {
+            margin-bottom: 5px;
+        }
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        .normal {
+            background-color: #e6f4ea;
+            border: 1px solid #b7e1cd;
+        }
+        .underweight {
+            background-color: #e8f0fe;
+            border: 1px solid #bdd7ee;
+        }
+        .overweight {
+            background-color: #fff8e1;
+            border: 1px solid #ffe082;
+        }
+        .obese {
+            background-color: #fce8e6;
+            border: 1px solid #f8cdd7;
+        }
+        .result h2 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .result p {
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .bmi-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .note {
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BMI指数自测工具</h1>
+        
+        <div class="input-group">
+            <label for="age">年龄（岁）</label>
+            <input type="number" id="age" min="1" placeholder="请输入年龄" required oninput="showStandards()">
+        </div>
+        
+        <div class="input-group">
+            <label for="height">身高（厘米）</label>
+            <input type="number" id="height" min="50" max="250" step="0.1" placeholder="请输入身高" required>
+        </div>
+        
+        <div class="input-group">
+            <label for="weight">体重（公斤）</label>
+            <input type="number" id="weight" min="10" max="300" step="0.1" placeholder="请输入体重" required>
+        </div>
+        
+        <!-- BMI判断标准展示区域 -->
+        <div class="standards" id="standards">
+            <h3>BMI判断标准</h3>
+            <ul>
+                <li>请输入年龄查看对应标准</li>
+            </ul>
+        </div>
+        
+        <button onclick="calculateBMI()">计算BMI</button>
+        
+        <div id="result" class="result">
+            <h2>你的BMI结果</h2>
+            <div class="bmi-value" id="bmiValue"></div>
+            <p id="bmiStatus"></p>
+        </div>
+        
+        <p class="note">BMI计算公式：体重(kg) ÷ 身高(m)² | 数据仅供参考，不代表医疗诊断</p>
+    </div>
+
+    <script>
+        // 显示对应年龄的BMI判断标准
+        function showStandards() {
+            const age = parseInt(document.getElementById('age').value);
+            const standardsDiv = document.getElementById('standards');
+            
+            if (!age || age < 1) {
+                standardsDiv.innerHTML = `
+                    <h3>BMI判断标准</h3>
+                    <ul>
+                        <li>请输入有效的年龄查看对应标准</li>
+                    </ul>
+                `;
+                return;
+            }
+            
+            // 根据年龄显示不同标准
+            if (age >= 65) {
+                standardsDiv.innerHTML = `
+                    <h3>65岁及以上老年人BMI判断标准</h3>
+                    <ul>
+                        <li>BMI ＜ 20：体重过低</li>
+                        <li>20 ≤ BMI ＜ 27：正常范围</li>
+                        <li>27 ≤ BMI ＜ 30：超重</li>
+                        <li>BMI ≥ 30：肥胖</li>
+                    </ul>
+                `;
+            } else {
+                standardsDiv.innerHTML = `
+                    <h3>成年人（18-64岁）BMI判断标准</h3>
+                    <ul>
+                        <li>BMI ＜ 18.5：偏瘦</li>
+                        <li>18.5 ≤ BMI ＜ 24：正常范围</li>
+                        <li>24 ≤ BMI ＜ 28：超重</li>
+                        <li>BMI ≥ 28：肥胖</li>
+                    </ul>
+                `;
+            }
+        }
+
+        // 计算BMI
+        function calculateBMI() {
+            // 获取输入值
+            const age = parseInt(document.getElementById('age').value);
+            const height = parseFloat(document.getElementById('height').value) / 100; // 转换为米
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            // 验证输入
+            if (!age || !height || !weight || height <= 0 || weight <= 0 || age < 1) {
+                alert('请输入有效的年龄、身高和体重');
+                return;
+            }
+            
+            // 计算BMI
+            const bmi = (weight / (height * height)).toFixed(1);
+            
+            // 判断BMI状态（区分65岁以上老年人和其他人群）
+            let status, className;
+            if (age >= 65) {
+                // 老年人标准
+                if (bmi < 20) {
+                    status = '体重过低';
+                    className = 'underweight';
+                } else if (bmi >= 20 && bmi < 27) {
+                    status = '正常';
+                    className = 'normal';
+                } else if (bmi >= 27 && bmi < 30) {
+                    status = '超重';
+                    className = 'overweight';
+                } else {
+                    status = '肥胖';
+                    className = 'obese';
+                }
+            } else {
+                // 普通人群标准
+                if (bmi < 18.5) {
+                    status = '偏瘦';
+                    className = 'underweight';
+                } else if (bmi >= 18.5 && bmi < 24) {
+                    status = '正常';
+                    className = 'normal';
+                } else if (bmi >= 24 && bmi < 28) {
+                    status = '超重';
+                    className = 'overweight';
+                } else {
+                    status = '肥胖';
+                    className = 'obese';
+                }
+            }
+            
+            // 显示结果
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = 'result ' + className;
+            document.getElementById('bmiValue').textContent = bmi;
+            document.getElementById('bmiStatus').textContent = `你的BMI指数为${bmi}，属于${status}范围。`;
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
